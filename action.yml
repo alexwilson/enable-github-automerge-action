@@ -1,0 +1,12 @@
+name: 'Enable Github Automerge'
+description: 'Enable Github auto-merge for specific pull-requests'
+branding:
+  icon: 'git-merge'
+  color: 'green'
+inputs:
+  github-token:
+    description: 'The GITHUB_TOKEN secret'
+    required: true
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
