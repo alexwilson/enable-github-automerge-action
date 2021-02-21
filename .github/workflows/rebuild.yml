@@ -1,0 +1,27 @@
+# Always rebuild the distributable action, so that we can release from `main` at any point
+# This doubles-up as a test, and also prevents tampering!
+
+name: Rebuild
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  rebuild:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+      with:
+        fetch-depth: 1
+    - uses: actions/setup-node@master
+    - name: Install Dependencies
+      run: npm ci --ignore-scripts
+    - name: Build
+      run: npm run build
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        file_pattern: dist/*
+        commit_message: "chore: 🛠 Rebuild action!"

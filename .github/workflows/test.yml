@@ -1,8 +1,10 @@
+# Attempt to lint & build the action.
+# We *separately* rebuild the action, this build is used as a status check.
 name: Test
 on:
   pull_request:
   schedule:
-    # Scheduled build so pipeline failures are noticed quicker.
+    # Scheduled build so failures are noticed quicker.
     - cron: '17 4 * * 2,5'
 
 
