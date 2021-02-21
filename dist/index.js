@@ -15,7 +15,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __importStar(__nccwpck_require__(87));
+const os = __importStar(__nccwpck_require__(365));
 const utils_1 = __nccwpck_require__(278);
 /**
  * Commands
@@ -113,7 +113,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const command_1 = __nccwpck_require__(351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(278);
-const os = __importStar(__nccwpck_require__(87));
+const os = __importStar(__nccwpck_require__(365));
 const path = __importStar(__nccwpck_require__(622));
 /**
  * The code to exit an action
@@ -350,7 +350,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__nccwpck_require__(747));
-const os = __importStar(__nccwpck_require__(87));
+const os = __importStar(__nccwpck_require__(365));
 const utils_1 = __nccwpck_require__(278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
@@ -395,7 +395,7 @@ exports.toCommandValue = toCommandValue;
 
 /***/ }),
 
-/***/ 53:
+/***/ 87:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -403,7 +403,7 @@ exports.toCommandValue = toCommandValue;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Context = void 0;
 const fs_1 = __nccwpck_require__(747);
-const os_1 = __nccwpck_require__(87);
+const os_1 = __nccwpck_require__(365);
 class Context {
     /**
      * Hydrate the context from the environment
@@ -478,7 +478,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(53));
+const Context = __importStar(__nccwpck_require__(87));
 const utils_1 = __nccwpck_require__(30);
 exports.context = new Context.Context();
 /**
@@ -571,7 +571,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(53));
+const Context = __importStar(__nccwpck_require__(87));
 const Utils = __importStar(__nccwpck_require__(914));
 // octokit + plugins
 const core_1 = __nccwpck_require__(762);
@@ -5783,6 +5783,122 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 20:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EnableGithubAutomergeAction = void 0;
+const core_1 = __nccwpck_require__(186);
+class EnableGithubAutomergeAction {
+    constructor(client, context, options) {
+        this.client = client;
+        this.context = context;
+        this.options = options;
+    }
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Find out where we are!
+            const { repo } = this.context;
+            if (!repo) {
+                throw new Error("Could not find repository!");
+            }
+            // Make sure this is actually a pull-request!
+            // We need this to retrieve the pull-request node ID.
+            const { pull_request: pullRequest } = this.context.payload;
+            if (!pullRequest) {
+                throw new Error("Event payload missing `pull_request`, is this a pull-request?");
+            }
+            const pullRequestId = pullRequest.node_id;
+            //
+            // Step 1. Retrieve the merge method!
+            core_1.debug(`Retrieving merge-method...`);
+            const mergeMethod = yield this.getMergeMethod(repo);
+            core_1.debug(`Successfully retrieved merge-method as: ${mergeMethod}`);
+            //
+            // Step 2. Enable auto-merge.
+            core_1.debug(`Enabling auto-merge for pull-request #${pullRequest.number}`);
+            yield this.enableAutoMerge(pullRequestId, mergeMethod);
+            core_1.debug(`Successfully enabled auto-merge for pull-request #${pullRequest.number}`);
+        });
+    }
+    getMergeMethod(repo) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const { preferredMergeMethod } = this.options;
+            // Allow users to specify a merge method.
+            if (preferredMergeMethod && preferredMergeMethod.length > 0) {
+                return preferredMergeMethod;
+            }
+            //
+            // Otherwise try and discover one.
+            //
+            // Merge is the default behaviour.
+            let mergeMethod = `MERGE`;
+            // Try to discover the repository's default merge method.
+            try {
+                const repositorySettings = (yield this.client.graphql(`
+          query($repository: String!, $owner: String!) {
+            repository(name:$repository, owner:$owner) {
+              viewerDefaultMergeMethod
+            }
+          }
+        `, {
+                    repository: repo.repo,
+                    owner: repo.owner,
+                }));
+                const viewerDefaultMergeMethod = ((_a = repositorySettings === null || repositorySettings === void 0 ? void 0 : repositorySettings.repository) === null || _a === void 0 ? void 0 : _a.viewerDefaultMergeMethod) || undefined;
+                if (viewerDefaultMergeMethod && viewerDefaultMergeMethod.length > 0) {
+                    mergeMethod = viewerDefaultMergeMethod;
+                }
+            }
+            catch (err) {
+                core_1.error(`Failed to read default merge method: ${err.message}`);
+            }
+            return mergeMethod;
+        });
+    }
+    enableAutoMerge(pullRequestId, mergeMethod) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.client.graphql(`
+        mutation(
+          $pullRequestId: ID!,
+          $mergeMethod: PullRequestMergeMethod!
+        ) {
+            enablePullRequestAutoMerge(input: {
+              pullRequestId: $pullRequestId,
+              mergeMethod: $mergeMethod
+            }) {
+            clientMutationId
+            pullRequest {
+              id
+              state
+            }
+          }
+        }
+      `, {
+                pullRequestId,
+                mergeMethod,
+            });
+        });
+    }
+}
+exports.EnableGithubAutomergeAction = EnableGithubAutomergeAction;
+exports.default = EnableGithubAutomergeAction;
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -5817,38 +5933,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(186));
+exports.run = void 0;
 const github = __importStar(__nccwpck_require__(438));
+const core_1 = __nccwpck_require__(186);
+const enable_github_automerge_action_1 = __nccwpck_require__(20);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const token = core.getInput("github-token", { required: true });
+            const { context } = github;
+            const options = Object.create(null);
+            const token = core_1.getInput("github-token", { required: true });
             const client = github.getOctokit(token);
-            const { pull_request: pullRequest } = github.context.payload;
-            if (!pullRequest) {
-                throw new Error("Event payload missing `pull_request`");
+            const preferredMergeMethod = core_1.getInput("merge-method", { required: false });
+            if (preferredMergeMethod) {
+                options.preferredMergeMethod = preferredMergeMethod;
             }
-            core.debug(`Enabling auto-merge for pull-request #${pullRequest.number}`);
-            client.graphql(`
-        mutation {
-            enablePullRequestAutoMerge(input:{
-            pullRequestId: "${pullRequest.node_id}"
-          }) {
-            clientMutationId
-            pullRequest {
-              id
-              state
-            }
-          }
-        }
-    `);
-            core.debug(`Successfully enabled auto-merge for pull-request #${pullRequest.number}`);
+            const automergeAction = new enable_github_automerge_action_1.EnableGithubAutomergeAction(client, context, options);
+            yield automergeAction.run();
         }
         catch (error) {
-            core.setFailed(error.message);
+            core_1.setFailed(error.message);
         }
     });
 }
+exports.run = run;
 run();
 
 
@@ -5910,7 +6018,7 @@ module.exports = require("net");;
 
 /***/ }),
 
-/***/ 87:
+/***/ 365:
 /***/ ((module) => {
 
 "use strict";

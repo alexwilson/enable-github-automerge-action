@@ -1,35 +1,31 @@
-import * as core from "@actions/core";
 import * as github from "@actions/github";
+import { setFailed, getInput } from "@actions/core";
+import {
+  EnableGithubAutomergeAction,
+  Options,
+} from "./enable-github-automerge-action";
 
-async function run() {
+export async function run() {
   try {
-    const token = core.getInput("github-token", { required: true });
+    const { context } = github;
+    const options: Options = Object.create(null);
+
+    const token = getInput("github-token", { required: true });
     const client = github.getOctokit(token);
 
-    const { pull_request: pullRequest } = github.context.payload;
-    if (!pullRequest) {
-      throw new Error("Event payload missing `pull_request`");
+    const preferredMergeMethod = getInput("merge-method", { required: false });
+    if (preferredMergeMethod) {
+      options.preferredMergeMethod = preferredMergeMethod;
     }
 
-    core.debug(`Enabling auto-merge for pull-request #${pullRequest.number}`);
-    client.graphql(`
-        mutation {
-            enablePullRequestAutoMerge(input:{
-            pullRequestId: "${pullRequest.node_id}"
-          }) {
-            clientMutationId
-            pullRequest {
-              id
-              state
-            }
-          }
-        }
-    `);
-    core.debug(
-      `Successfully enabled auto-merge for pull-request #${pullRequest.number}`
+    const automergeAction = new EnableGithubAutomergeAction(
+      client,
+      context,
+      options
     );
+    await automergeAction.run();
   } catch (error) {
-    core.setFailed(error.message);
+    setFailed(error.message);
   }
 }
 
