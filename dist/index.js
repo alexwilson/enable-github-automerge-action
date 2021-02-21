@@ -8824,6 +8824,117 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 4020:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core_1 = __nccwpck_require__(2186);
+class EnableGithubAutomergeAction {
+    constructor(client, context) {
+        this.client = client;
+        this.context = context;
+    }
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Find out where we are!
+            const { repo } = this.context;
+            if (!repo) {
+                throw new Error("Could not find repository!");
+            }
+            // Make sure this is actually a pull-request!
+            // We need this to retrieve the pull-request node ID.
+            const { pull_request: pullRequest } = this.context.payload;
+            if (!pullRequest) {
+                throw new Error("Event payload missing `pull_request`, is this a pull-request?");
+            }
+            const pullRequestId = pullRequest.node_id;
+            // Step 1. Retrieve the merge method!
+            core_1.debug(`Retrieving merge-method...`);
+            const mergeMethod = yield this.getMergeMethod(repo);
+            core_1.debug(`Successfully retrieved merge-method: ${mergeMethod}`);
+            // Step 2. Enable auto-merge.
+            core_1.debug(`Enabling auto-merge for pull-request #${pullRequest.number}`);
+            yield this.enableAutoMerge(pullRequestId, mergeMethod);
+            core_1.debug(`Successfully enabled auto-merge for pull-request #${pullRequest.number}`);
+        });
+    }
+    getMergeMethod(repo) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const preferredMergeMethod = core_1.getInput("merge-method", { required: false });
+            // Allow users to specify a merge method.
+            if (preferredMergeMethod) {
+                return preferredMergeMethod;
+            }
+            //
+            // Otherwise try and discover one.
+            //
+            // Merge is the default behaviour.
+            let mergeMethod = `MERGE`;
+            // Try to discover the repository's default merge method.
+            try {
+                const repositorySettings = yield this.client.graphql(`
+          query($repository: String!, $owner: String!) {
+            repository(name:$repository, owner:$owner) {
+              viewerDefaultMergeMethod
+            }
+          }
+        `, {
+                    repository: repo.repo,
+                    owner: repo.owner
+                });
+                const viewerDefaultMergeMethod = ((_a = repositorySettings === null || repositorySettings === void 0 ? void 0 : repositorySettings.repository) === null || _a === void 0 ? void 0 : _a.viewerDefaultMergeMethod) || undefined;
+                if (viewerDefaultMergeMethod) {
+                    mergeMethod = viewerDefaultMergeMethod;
+                }
+            }
+            catch (err) {
+                core_1.error(`Failed to read default merge method: ${err.message}`);
+            }
+            return mergeMethod;
+        });
+    }
+    enableAutoMerge(pullRequestId, mergeMethod) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.client.graphql(`
+        mutation(
+          $pullRequestId: ID!,
+          $mergeMethod: PullRequestMergeMethod!
+        ) {
+            enablePullRequestAutoMerge(input: {
+              pullRequestId: $pullRequestId,
+              mergeMethod: $mergeMethod
+            }) {
+            clientMutationId
+            pullRequest {
+              id
+              state
+            }
+          }
+        }
+      `, {
+                pullRequestId,
+                mergeMethod
+            });
+        });
+    }
+}
+exports.default = EnableGithubAutomergeAction;
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -8857,42 +8968,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
+const enable_github_automerge_action_1 = __importDefault(__nccwpck_require__(4020));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const { context } = github;
             const token = core.getInput("github-token", { required: true });
             const client = github.getOctokit(token);
-            const { pull_request: pr } = github.context.payload;
-            if (!pr) {
-                throw new Error("Event payload missing `pull_request`");
-            }
-            core.debug(`Enabling auto-merge for pull-request #${pr.number}`);
-            client.graphql(`
-        mutation {
-            enablePullRequestAutoMerge(input:{
-            pullRequestId: "${pr.node_id}"
-          }) {
-            actor {
-              login
-            }
-            clientMutationId
-            pullRequest {
-              id
-              state
-            }
-          }
-        }
-    `);
-            core.debug(`Successfully enabled auto-merge for pull-request #${pr.number}`);
+            const automergeAction = new enable_github_automerge_action_1.default(client, context);
+            yield automergeAction.run();
         }
         catch (error) {
             core.setFailed(error.message);
         }
     });
 }
+exports.run = run;
 run();
 
 

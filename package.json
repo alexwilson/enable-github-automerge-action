@@ -1,12 +1,13 @@
 {
   "name": "enable-github-automerge-action",
-  "version": "0.0.0-alpha.1",
+  "version": "0.0.0-alpha.2",
   "description": "",
   "main": "dist/main.ts",
   "scripts": {
     "build": "ncc build src/main.ts",
     "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts"
+    "format-check": "prettier --check **/*.ts",
+    "local": "ts-node src/local.ts"
   },
   "author": "Alex Wilson <alex@alexwilson.tech>",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "@types/node": "^14.14.25",
     "@vercel/ncc": "^0.27.0",
     "prettier": "^2.2.1",
+    "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   },
   "dependencies": {
