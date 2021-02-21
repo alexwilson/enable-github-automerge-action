@@ -52,3 +52,4 @@ This file sets environment variables locally to enable action inputs, and points
 2. Set `GITHUB_TOKEN` locally.  (You can do this via `$ export GITHUB_TOKEN=blah`)
 3. Optionally(!) set `MERGE_METHOD` locally.  (You can do this via `$ export MERGE_METHOD=MERGE`)
 4. Run with `npm run local`.
+5. **Important**: Avoid committing anything to `dist/*` — this is automatically regenerated and manually adjusting this will make rebasing harder!
