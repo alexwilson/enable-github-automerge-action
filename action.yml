@@ -7,6 +7,9 @@ inputs:
   github-token:
     description: 'The GITHUB_TOKEN secret'
     required: true
+  merge-method:
+    description: 'Preferred merge method for automatic merges.'
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'
