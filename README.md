@@ -14,7 +14,7 @@ This action pairs well with [`hmarr/auto-approve-action`](https://github.com/hma
 
 ## 2) Usage
 
-Add as a step inside a GitHub workflow, e.g. `.github/workflows/auto-merge.yml`.
+Add as a step inside a GitHub workflow, e.g. `.github/workflows/auto-merge.yml`.  [You can see an example of this in this repository](./.github/workflows/auto-merge-dependabot.yml).
 
 ```yaml
 name: Auto-Merge
@@ -24,7 +24,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: alexwilson/enable-github-automerge-action@1.0.0
+    - uses: alexwilson/enable-github-automerge-action@main
         github-token: "${{ secrets.GITHUB_TOKEN }}"
 ```
 
