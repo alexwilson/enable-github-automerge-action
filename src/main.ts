@@ -1,21 +1,32 @@
-import * as core from "@actions/core";
 import * as github from "@actions/github";
-import EnableGithubAutomergeAction from "./enable-github-automerge-action"
+import { setFailed, getInput } from "@actions/core";
+import {
+  EnableGithubAutomergeAction,
+  Options,
+} from "./enable-github-automerge-action";
 
 export async function run() {
+  try {
+    const { context } = github;
+    const options: Options = Object.create(null);
 
-  try {    
-    const { context }  = github;
-    const token = core.getInput("github-token", { required: true });
+    const token = getInput("github-token", { required: true });
     const client = github.getOctokit(token);
-  
-    const automergeAction = new EnableGithubAutomergeAction(client, context)
+
+    const preferredMergeMethod = getInput("merge-method", { required: false });
+    if (preferredMergeMethod) {
+      options.preferredMergeMethod = preferredMergeMethod;
+    }
+
+    const automergeAction = new EnableGithubAutomergeAction(
+      client,
+      context,
+      options
+    );
     await automergeAction.run();
-
-  } catch(error) {
-    core.setFailed(error.message);
+  } catch (error) {
+    setFailed(error.message);
   }
-
 }
 
 run();
