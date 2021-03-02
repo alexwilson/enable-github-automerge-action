@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: alexwilson/enable-github-automerge-action@main
+      with:
         github-token: "${{ secrets.GITHUB_TOKEN }}"
 ```
 
