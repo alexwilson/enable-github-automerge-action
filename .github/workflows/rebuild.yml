@@ -23,5 +23,5 @@ jobs:
       run: npm run build
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        file_pattern: dist/*
+        file_pattern: --force dist/*
         commit_message: "chore: 🛠 Rebuild action!"
