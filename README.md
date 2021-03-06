@@ -1,5 +1,11 @@
 # Enable Github Auto-Merge Action
 
+> Speed up your workflows by automatically enabling Auto-Merge in your Github pull-requests, so you can release when ready.
+
+[![Public workflows that use this action](https://img.shields.io/endpoint?url=https%3A%2F%2Fapi-git-master.endbug.vercel.app%2Fapi%2Fgithub-actions%2Fused-by%3Faction%3Dalexwilson%2Fenable-github-automerge-action%26badge%3Dtrue)](https://github.com/search?o=desc&q=alexwilson%2Fenable-github-automerge-action+path%3A.github%2Fworkflows+language%3AYAML&s=&type=Code)
+[![CI status](https://github.com/alexwilson/enable-github-automerge-action/workflows/Test/badge.svg)](https://github.com/alexwilson/enable-github-automerge-action/actions?query=workflow%Test)
+
+
 Name: `alexwilson/enable-github-automerge-action`
 
 ## 1) What is this?
