@@ -8,6 +8,13 @@ export type Options = {
   preferredMergeMethod?: string;
 };
 
+type EnableAutoMergeResponse = {
+  mutationId: string | undefined;
+  pullRequestState: string | undefined;
+  enabledAt: string | undefined;
+  enabledBy: string | undefined;
+};
+
 export class EnableGithubAutomergeAction {
   private client: GitHubClient;
 
@@ -46,10 +53,13 @@ export class EnableGithubAutomergeAction {
 
     //
     // Step 2. Enable auto-merge.
-    debug(`Enabling auto-merge for pull-request #${pullRequest.number}`);
-    await this.enableAutoMerge(pullRequestId, mergeMethod);
-    debug(
-      `Successfully enabled auto-merge for pull-request #${pullRequest.number}`
+    debug(`Enabling auto-merge for pull-request #${pullRequest.number}...`);
+    const { enabledBy, enabledAt } = await this.enableAutoMerge(
+      pullRequestId,
+      mergeMethod
+    );
+    info(
+      `Successfully enabled auto-merge for pull-request #${pullRequest.number} as ${enabledBy} at ${enabledAt}`
     );
   }
 
@@ -96,8 +106,11 @@ export class EnableGithubAutomergeAction {
     return mergeMethod;
   }
 
-  private async enableAutoMerge(pullRequestId: string, mergeMethod: string) {
-    return await this.client.graphql(
+  private async enableAutoMerge(
+    pullRequestId: string,
+    mergeMethod: string
+  ): Promise<EnableAutoMergeResponse> {
+    const response = (await this.client.graphql(
       `
         mutation(
           $pullRequestId: ID!,
@@ -111,6 +124,12 @@ export class EnableGithubAutomergeAction {
             pullRequest {
               id
               state
+              autoMergeRequest {
+                enabledAt
+                enabledBy {
+                  login
+                }
+              }
             }
           }
         }
@@ -119,7 +138,32 @@ export class EnableGithubAutomergeAction {
         pullRequestId,
         mergeMethod,
       }
-    );
+    )) as any;
+
+    const enableAutoMergeResponse: EnableAutoMergeResponse = {
+      mutationId: response?.enablePullRequestAutoMerge?.clientMutationId,
+      enabledAt:
+        response?.enablePullRequestAutoMerge?.pullRequest?.autoMergeRequest
+          ?.enabledAt,
+      enabledBy:
+        response?.enablePullRequestAutoMerge?.pullRequest?.autoMergeRequest
+          ?.enabledBy?.login,
+      pullRequestState:
+        response?.enablePullRequestAutoMerge?.pullRequest?.state,
+    };
+
+    if (
+      !enableAutoMergeResponse.enabledAt &&
+      !enableAutoMergeResponse.enabledBy
+    ) {
+      error(
+        `Failed to enable auto-merge: Received: ${JSON.stringify(
+          enableAutoMergeResponse
+        )}`
+      );
+    }
+
+    return enableAutoMergeResponse;
   }
 }
 
