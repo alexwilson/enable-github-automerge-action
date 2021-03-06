@@ -5827,9 +5827,9 @@ class EnableGithubAutomergeAction {
             core_1.debug(`Successfully retrieved merge-method as: ${mergeMethod}`);
             //
             // Step 2. Enable auto-merge.
-            core_1.debug(`Enabling auto-merge for pull-request #${pullRequest.number}`);
-            yield this.enableAutoMerge(pullRequestId, mergeMethod);
-            core_1.debug(`Successfully enabled auto-merge for pull-request #${pullRequest.number}`);
+            core_1.debug(`Enabling auto-merge for pull-request #${pullRequest.number}...`);
+            const { enabledBy, enabledAt } = yield this.enableAutoMerge(pullRequestId, mergeMethod);
+            core_1.info(`Successfully enabled auto-merge for pull-request #${pullRequest.number} as ${enabledBy} at ${enabledAt}`);
         });
     }
     getMergeMethod(repo) {
@@ -5869,8 +5869,9 @@ class EnableGithubAutomergeAction {
         });
     }
     enableAutoMerge(pullRequestId, mergeMethod) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.client.graphql(`
+            const response = (yield this.client.graphql(`
         mutation(
           $pullRequestId: ID!,
           $mergeMethod: PullRequestMergeMethod!
@@ -5883,13 +5884,30 @@ class EnableGithubAutomergeAction {
             pullRequest {
               id
               state
+              autoMergeRequest {
+                enabledAt
+                enabledBy {
+                  login
+                }
+              }
             }
           }
         }
       `, {
                 pullRequestId,
                 mergeMethod,
-            });
+            }));
+            const enableAutoMergeResponse = {
+                mutationId: (_a = response === null || response === void 0 ? void 0 : response.enablePullRequestAutoMerge) === null || _a === void 0 ? void 0 : _a.clientMutationId,
+                enabledAt: (_d = (_c = (_b = response === null || response === void 0 ? void 0 : response.enablePullRequestAutoMerge) === null || _b === void 0 ? void 0 : _b.pullRequest) === null || _c === void 0 ? void 0 : _c.autoMergeRequest) === null || _d === void 0 ? void 0 : _d.enabledAt,
+                enabledBy: (_h = (_g = (_f = (_e = response === null || response === void 0 ? void 0 : response.enablePullRequestAutoMerge) === null || _e === void 0 ? void 0 : _e.pullRequest) === null || _f === void 0 ? void 0 : _f.autoMergeRequest) === null || _g === void 0 ? void 0 : _g.enabledBy) === null || _h === void 0 ? void 0 : _h.login,
+                pullRequestState: (_k = (_j = response === null || response === void 0 ? void 0 : response.enablePullRequestAutoMerge) === null || _j === void 0 ? void 0 : _j.pullRequest) === null || _k === void 0 ? void 0 : _k.state,
+            };
+            if (!enableAutoMergeResponse.enabledAt &&
+                !enableAutoMergeResponse.enabledBy) {
+                core_1.error(`Failed to enable auto-merge: Received: ${JSON.stringify(enableAutoMergeResponse)}`);
+            }
+            return enableAutoMergeResponse;
         });
     }
 }
