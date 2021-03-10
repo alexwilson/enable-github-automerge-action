@@ -12,23 +12,30 @@ Name: `alexwilson/enable-github-automerge-action`
 
 To speed up some of your workflows, this action allows you to automatically enable [Auto-Merge](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/automatically-merging-a-pull-request) in your Github pull-requests.  
 
-When enabled, Auto-Merge will merge pull-requests automatically _as soon as all requirements are met_ (approvals, passing tests).
+When enabled, auto-merge will merge pull-requests automatically _as soon as all requirements are met_ (i.e. approvals, passing tests).
 
 _You can use this, for example, to automatically merge Dependabot pull-requests_.
 
-This action pairs well with [`hmarr/auto-approve-action`](https://github.com/hmarr/auto-approve-action)
+This action pairs well with [`hmarr/auto-approve-action`](https://github.com/hmarr/auto-approve-action).
 
 ## 2) Usage
 
 Add as a step inside a GitHub workflow, e.g. `.github/workflows/auto-merge.yml`.  [You can see an example of this in this repository](./.github/workflows/auto-merge-dependabot.yml).
 
+> ⚠️  GitHub have [recently improved the security model of actions](https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/) reducing the risk of unknown code accessing secrets, so we recommend running this in an isolated workflow within the `pull_request_target` scope, on a trusted event (e.g. `labeled`).
+
 ```yaml
 name: Auto-Merge
-on: pull_request
+on:
+  pull_request_target:
+    types: [labeled]
 
 jobs:
-  build:
+  enable-auto-merge:
     runs-on: ubuntu-latest
+
+    # Specifically check that dependabot (or another trusted party) created this pull-request, and that it has been labelled correctly.
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
     - uses: alexwilson/enable-github-automerge-action@main
       with:
