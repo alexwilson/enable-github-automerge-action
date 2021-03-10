@@ -7,23 +7,15 @@ on:
     types: [labeled]
 
 jobs:
-  auto-update-dependencies:
-    name: Auto-Approve and enable Auto-Merge for all Dependabot PRs
+  # Explicitly check-out & run a local version of this action.
+  # Note: This is *not* a recommended practice, and is only done here to dogfood the action.
+  # Please avoid running this action in a workflow which checks out code.
+  auto-merge-dependency-updates:
+    name: Enable auto-merge for Dependabot PRs
     runs-on: ubuntu-latest
-    
     # Specifically check the creator of the pull-request, not the actor.
     if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
-    
-    # Reference hmarr/auto-approve-action by commit SHA as it is an immutable reference to a
-    # known, "trusted" version of this 3rd party code.
-    - id: auto-approve-dependabot
-      uses: hmarr/auto-approve-action@bca9db08da72b576ae3273e776e7ccf3f0a36e12
-      with:
-        github-token: "${{ secrets.GITHUB_TOKEN }}"
-        
-    # Note: This is *not* a recommended practice, and is only done here to dogfood the action.
-    # Please avoid running this action in a workflow which checks out code.
     - name: Checkout
       uses: actions/checkout@master
       with:
@@ -31,5 +23,20 @@ jobs:
     - id: enable-automerge
       name: Enable Github Automerge
       uses: ./
+      with:
+        github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+  # Reference hmarr/auto-approve-action by commit SHA as it is an immutable reference to a
+  # known, "trusted" version of this 3rd party code.
+  # Note: This is a separate job to explicitly *not* check-out local code.
+  auto-approve-dependency-updates:
+    name: Approve dependabot PRs
+    runs-on: ubuntu-latest
+    needs: auto-merge-dependency-updates
+    # Specifically check the creator of the pull-request, not the actor.
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
+    steps:
+    - id: auto-approve-dependabot
+      uses: hmarr/auto-approve-action@bca9db08da72b576ae3273e776e7ccf3f0a36e12
       with:
         github-token: "${{ secrets.GITHUB_TOKEN }}"
