@@ -24,7 +24,7 @@ jobs:
       name: Enable Github Automerge
       uses: ./
       with:
-        github-token: "${{ secrets.GITHUB_TOKEN }}"
+        github-token: "${{ secrets.ENABLE_AUTOMERGE_ACTION_TOKEN }}"
 
   # Reference hmarr/auto-approve-action by commit SHA as it is an immutable reference to a
   # known, "trusted" version of this 3rd party code.
