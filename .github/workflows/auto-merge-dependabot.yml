@@ -1,17 +1,29 @@
 name: Automatically Update Dependencies
+
+# `pull_request_target` grants access to secrets and runs in the scope of the *destination* branch.
+# Specifically we listen for the labelled event.
 on:
-  pull_request:
+  pull_request_target:
+    types: [labeled]
 
 jobs:
   auto-update-dependencies:
     name: Auto-Approve and enable Auto-Merge for all Dependabot PRs
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
+    
+    # Specifically check the creator of the pull-request, not the actor.
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
+    
+    # Reference hmarr/auto-approve-action by commit SHA as it is an immutable reference to a
+    # known, "trusted" version of this 3rd party code.
     - id: auto-approve-dependabot
-      uses: hmarr/auto-approve-action@v2.0.0
+      uses: hmarr/auto-approve-action@bca9db08da72b576ae3273e776e7ccf3f0a36e12
       with:
         github-token: "${{ secrets.GITHUB_TOKEN }}"
+        
+    # Note: This is *not* a recommended practice, and is only done here to dogfood the action.
+    # Please avoid running this action in a workflow which checks out code.
     - name: Checkout
       uses: actions/checkout@master
       with:
