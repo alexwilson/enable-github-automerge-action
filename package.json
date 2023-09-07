@@ -13,7 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.1.0",
-    "@vercel/ncc": "^0.36.0",
+    "@vercel/ncc": "^0.38.0",
     "prettier": "^3.0.0",
     "ts-node": "^10.0.0",
     "typescript": "^5.0.2"
