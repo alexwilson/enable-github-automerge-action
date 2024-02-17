@@ -15,7 +15,7 @@ async function run() {
     __dirname,
     "..",
     "stub",
-    "example-pull-request.json"
+    "example-pull-request.json",
   );
 
   require("./main");

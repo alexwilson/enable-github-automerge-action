@@ -40,7 +40,7 @@ export class EnableGithubAutomergeAction {
     const { pull_request: pullRequest } = this.context.payload;
     if (!pullRequest) {
       throw new Error(
-        "Event payload missing `pull_request`, is this a pull-request?"
+        "Event payload missing `pull_request`, is this a pull-request?",
       );
     }
     const pullRequestId = pullRequest.node_id;
@@ -56,10 +56,10 @@ export class EnableGithubAutomergeAction {
     debug(`Enabling auto-merge for pull-request #${pullRequest.number}...`);
     const { enabledBy, enabledAt } = await this.enableAutoMerge(
       pullRequestId,
-      mergeMethod
+      mergeMethod,
     );
     info(
-      `Successfully enabled auto-merge for pull-request #${pullRequest.number} as ${enabledBy} at ${enabledAt}`
+      `Successfully enabled auto-merge for pull-request #${pullRequest.number} as ${enabledBy} at ${enabledAt}`,
     );
   }
 
@@ -91,7 +91,7 @@ export class EnableGithubAutomergeAction {
         {
           repository: repo.repo,
           owner: repo.owner,
-        }
+        },
       )) as any;
       const viewerDefaultMergeMethod =
         repositorySettings?.repository?.viewerDefaultMergeMethod || undefined;
@@ -108,7 +108,7 @@ export class EnableGithubAutomergeAction {
 
   private async enableAutoMerge(
     pullRequestId: string,
-    mergeMethod: string
+    mergeMethod: string,
   ): Promise<EnableAutoMergeResponse> {
     const response = (await this.client.graphql(
       `
@@ -137,7 +137,7 @@ export class EnableGithubAutomergeAction {
       {
         pullRequestId,
         mergeMethod,
-      }
+      },
     )) as any;
 
     const enableAutoMergeResponse: EnableAutoMergeResponse = {
@@ -158,8 +158,8 @@ export class EnableGithubAutomergeAction {
     ) {
       error(
         `Failed to enable auto-merge: Received: ${JSON.stringify(
-          enableAutoMergeResponse
-        )}`
+          enableAutoMergeResponse,
+        )}`,
       );
     }
 

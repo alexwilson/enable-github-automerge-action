@@ -21,7 +21,7 @@ export async function run() {
     const automergeAction = new EnableGithubAutomergeAction(
       client,
       context,
-      options
+      options,
     );
     await automergeAction.run();
   } catch (error) {
