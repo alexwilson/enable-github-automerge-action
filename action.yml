@@ -11,5 +11,5 @@ inputs:
     description: 'Preferred merge method for automatic merges.'
     required: false
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
