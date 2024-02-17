@@ -12,16 +12,18 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
-      with:
-        fetch-depth: 1
-    - uses: actions/setup-node@master
-    - name: Install Dependencies
-      run: npm ci --ignore-scripts
-    - name: Build
-      run: npm run build
-    - uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        file_pattern: --force dist/*
-        commit_message: "chore: 🛠 Rebuild action!"
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@main
+        with:
+          node-version-file: ".nvmrc"
+      - name: Install Dependencies
+        run: npm ci --ignore-scripts
+      - name: Build
+        run: npm run build
+      - uses: stefanzweifel/git-auto-commit-action@8756aa072ef5b4a080af5dc8fef36c5d586e521d
+        with:
+          file_pattern: --force dist/*
+          commit_message: "chore: 🛠 Rebuild action!"
