@@ -25,7 +25,8 @@ export async function run() {
     );
     await automergeAction.run();
   } catch (error) {
-    setFailed(error.message);
+    let message = error instanceof Error ? error.message : String(error);
+    setFailed(message);
   }
 }
 

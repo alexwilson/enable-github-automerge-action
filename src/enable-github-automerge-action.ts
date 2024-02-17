@@ -100,7 +100,8 @@ export class EnableGithubAutomergeAction {
         mergeMethod = viewerDefaultMergeMethod;
       }
     } catch (err) {
-      error(`Failed to read default merge method: ${err.message}`);
+      let message = err instanceof Error ? err.message : String(err);
+      error(`Failed to read default merge method: ${message}`);
     }
 
     return mergeMethod;
