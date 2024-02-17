@@ -16,15 +16,15 @@ jobs:
     # Specifically check the creator of the pull-request, not the actor.
     if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
-      with:
-        fetch-depth: 1
-    - id: enable-automerge
-      name: Enable Github Automerge
-      uses: ./
-      with:
-        github-token: "${{ secrets.ENABLE_AUTOMERGE_ACTION_TOKEN }}"
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 1
+      - id: enable-automerge
+        name: Enable Github Automerge
+        uses: ./
+        with:
+          github-token: "${{ secrets.ENABLE_AUTOMERGE_ACTION_TOKEN }}"
 
   # Reference hmarr/auto-approve-action by commit SHA as it is an immutable reference to a
   # known, "trusted" version of this 3rd party code.
@@ -36,7 +36,7 @@ jobs:
     # Specifically check the creator of the pull-request, not the actor.
     if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
-    - id: auto-approve-dependabot
-      uses: hmarr/auto-approve-action@bca9db08da72b576ae3273e776e7ccf3f0a36e12
-      with:
-        github-token: "${{ secrets.GITHUB_TOKEN }}"
+      - id: auto-approve-dependabot
+        uses: hmarr/auto-approve-action@8f929096a962e83ccdfa8afcf855f39f12d4dac7
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"

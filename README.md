@@ -10,7 +10,7 @@ Name: `alexwilson/enable-github-automerge-action`
 
 ## 1) What is this?
 
-To speed up some of your workflows, this action allows you to automatically enable [Auto-Merge](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/automatically-merging-a-pull-request) in your Github pull-requests.  
+To speed up some of your workflows, this action allows you to automatically enable [Auto-Merge](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/automatically-merging-a-pull-request) in your Github pull-requests.
 
 When enabled, auto-merge will merge pull-requests automatically _as soon as all requirements are met_ (i.e. approvals, passing tests).
 
