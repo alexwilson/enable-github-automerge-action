@@ -1,12 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "56e3117d1ae1540309dc8f7a9f2825bc3c5f06ff",
   "packages": {
     ".": {
       "release-type": "node",
       "package-name": "enable-github-automerge-action",
       "include-component-in-tag": false,
       "include-v-in-tag": false,
-      "bootstrap-sha": "56e3117d1ae1540309dc8f7a9f2825bc3c5f06ff",
       "changelog-sections": [
         { "type": "feat", "section": "Features" },
         { "type": "fix", "section": "Bug Fixes" },
