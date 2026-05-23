@@ -27,5 +27,7 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Lint
         run: npm run format-check
+      - name: Test
+        run: npm test
       - name: Build
         run: npm run build
