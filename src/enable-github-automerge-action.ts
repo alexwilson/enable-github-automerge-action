@@ -1,8 +1,9 @@
 import { info, debug, error } from "@actions/core";
 import type { GitHub } from "@actions/github/lib/utils";
-import type { Context } from "@actions/github/lib/context";
+import type * as github from "@actions/github";
 
 type GitHubClient = InstanceType<typeof GitHub>;
+type Context = typeof github.context;
 
 export type Options = {
   preferredMergeMethod?: string;
