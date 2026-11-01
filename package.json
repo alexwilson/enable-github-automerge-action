@@ -16,7 +16,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "29.0.3",
     "@rollup/plugin-node-resolve": "16.0.3",
-    "@rollup/plugin-typescript": "12.3.0",
+    "@rollup/plugin-typescript": "12.3.1",
     "@types/node": "25.9.3",
     "prettier": "3.9.10",
     "rollup": "4.64.9",
