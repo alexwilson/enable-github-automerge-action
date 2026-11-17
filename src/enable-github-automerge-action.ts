@@ -142,6 +142,12 @@ export class EnableGithubAutomergeAction {
       },
     )) as any;
 
+    if (response.errors && response.errors.length > 0) {
+      throw new Error(
+        `GitHub API returned errors: ${JSON.stringify(response.errors)}`,
+      );
+    }
+
     const enableAutoMergeResponse: EnableAutoMergeResponse = {
       mutationId: response?.enablePullRequestAutoMerge?.clientMutationId,
       enabledAt:
@@ -158,7 +164,7 @@ export class EnableGithubAutomergeAction {
       !enableAutoMergeResponse.enabledAt &&
       !enableAutoMergeResponse.enabledBy
     ) {
-      error(
+      throw new Error(
         `Failed to enable auto-merge: Received: ${JSON.stringify(
           enableAutoMergeResponse,
         )}`,
